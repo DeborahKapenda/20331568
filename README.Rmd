@@ -18,13 +18,7 @@ The purpose of the project is to create
 ## Code used for Figures and Tables
 
 ```{r}
-gc() # garbage collection - It can be useful to call gc after a large object has been removed, as this may prompt R to return memory to the operating system.
-library(pacman)
-p_load(tidyverse, lubridate)
 
-# Source in all your functions:
-# walk is the 'silent' version of map, which is similar to lapply.
-list.files('D:/20331568/Solution/20331568/Question1/code', full.names = T, recursive = T) %>% as.list() %>% walk(~source(.))
 ```
 
 ### Data
@@ -38,9 +32,7 @@ For loading in the README - adjust the code.
 #### Loading the data
 
 ```{r}
-#ctrl alt i - load r chunk 
-
-#datcolat <- Data_Collating(Datroot = "Question1/Data/Happy/")
+q1()
 
 
 ```
@@ -48,24 +40,35 @@ For loading in the README - adjust the code.
 
 #### First plot
 
-I can describe this plot as follows...
-
-It shows that ....
+It shows that rotten tomatoes movie ratings above 80% 
 
 ```{r}
-# adjust the sizes to fit into the readme a bit.
-
-#g <- Error_bar_plot(datcolat, xaxis_size = 9, xaxis_rows = 3)
-#g
+r()
 ```
 
-The second plot in the paper ...
+The graph below disagrees with above statement. It does the audience score of greater than 85%.
 
 ```{r}
- # g <-  Barplot_breakdown_Happy_Contributors(datcolat, Title = "Barplot making up the ladder", Subtitle = "Look at the colours - wow.", xaxis_size = 9, xaxis_rows = 3)
-    
-#g
+rr(e)
 ```
+
+## LeadsStudio Profitablity 
+Disney is seen to be more profitable under Comedy and Anation films. Not ture for all leading studios 
+
+```{r}
+dis(b)
+```
+
+## World Wide gross rate films
+
+The figure shows that the films with the highest world wide gross above 100 are Comedy. 
+I think most people enjoy a good laugh. 
+
+```{r}
+h(t)
+```
+
+
 
 ## Question 2
 
@@ -80,59 +83,34 @@ list.files('D:/20331568/Solution/20331568/Question2/code', full.names = T, recur
 ```
 
 ## Data loading:
+The data was be cleaned and changed for plotting. 
+
 ```{r}
-Loc <- "Question2/data/Wine/"
-    dff <- read_rds(glue::glue("{Loc}WineMag.rds"))
-    Fruitlist <- read_table("Question2/data/wine/Fruitlist.txt")
-    froots <- Fruitlist$Fruits  %>% unique %>% as.list()
-    CountryList <- c("South Africa", "Italy", "France", "US", "Spain")
+data1()
 
-    dff_adj <- dff %>% filter(country %in% CountryList)
 ```
-
 
 
 ### First plot
 
-I can describe this plot as follows...
 
-It shows that ....
+It shows that Billonaires under the age of 30. The united states has the highest count. 
 
 ```{r}
-
-```
-
-### Table of Frequency 
-
-This is a table function with Latex argument so that it can build in html form for use in README.
-
-```{r, message=FALSE}
-Tab <- Term_refs_table(dff_adj, Latex = FALSE)
-Tab
+figure1(g)
 ```
 
 
 ### Second plot
 
-I can describe this plot as follows...
-
-It shows that ....
+It shows that the United States has again the richest people with majority of the top 10 Billionaires from there. This is followed by France and India. 
 
 ```{r, message=FALSE}
-Tasters <- c( "Lauren Buzzeo" , "Susan Kostrzewa")
-df_SA <-
-    dff %>% filter(country %in% "South Africa", price > 50, taster_name %in% Tasters)
-
-gg <- Top_5_Wineries_SA_Plot(df_SA, Tasters)
-gg
+figure2(d)
 ```
 
-### Regression plot
 
-Short overview
 
-```{r, message=FALSE}
-Regression_Plot(df_SA)
+## Question 3 
 
-```
 

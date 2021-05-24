@@ -1,0 +1,65 @@
+---
+title: "Title for question"
+output:
+ pdf_document
+---
+
+## Overview 
+
+
+### Question 2
+
+## Data Directory 
+
+```{r}
+if(!require("tidyverse")) install.packages("tidyverse")
+library(tidyverse)
+
+list.files('D:/20331568/Solution/20331568/Question2/code', full.names = T, recursive = T) %>% as.list() %>% walk(~source(.))
+```
+
+## Data loading:
+```{r}
+
+```
+
+
+### First plot
+
+I can describe this plot as follows...
+
+It shows that ....
+
+```{r}
+
+```
+
+### Table of Frequency 
+
+This is a table function with Latex argument so that it can build in html form for use in README.
+
+```{r, message=FALSE}
+
+```
+
+
+### Second plot
+
+I can describe this plot as follows...
+
+It shows that ....
+
+```{r, message=FALSE}
+
+```
+
+### Regression plot
+
+Short overview
+
+```{r, message=FALSE}
+
+
+```
+
+

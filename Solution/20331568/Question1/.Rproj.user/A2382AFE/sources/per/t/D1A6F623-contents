@@ -1,0 +1,303 @@
+---
+title: "Question 1 mock test"
+author: "Deborah Kapenda"
+date: "20/05/2021"
+output: pdf_document
+---
+
+# Texevier install and load
+```{r}
+#install.packages(c('tinytex', 'rmarkdown'))
+#library(tinytex)
+#library(rmarkdown)
+#tinytex::install_tinytex()
+
+# 1. Try update
+#update.packages(ask = FALSE, checkBuilt = TRUE)
+#tinytex::tlmgr_update()
+
+# 2. 
+tinytex::reinstall_tinytex()
+```
+
+
+# Preamble
+```{r}
+# Check and get wd
+ getwd()
+#setwd('C:/Users/Dell/Documents/R data science/R practice/R DataScieence Test')
+# getwd()
+
+# Preamble: load all the required packages and 
+library(dplyr)
+library(ggplot2)
+library(tibble)
+library(tidyr)
+library(plyr)
+library(readr)
+library(tidyverse)
+```
+# Question 1: World Happiness Report
+
+## Importing the data (Method 1)
+
+``` {r}
+dir()
+mydir = "Happy"
+myfiles = list.files(path=mydir, pattern=".csv", full.names=TRUE)
+myfiles
+#To upload all files and create a dataset 
+dat_csv = ldply(myfiles, read_csv)
+dat_csv
+
+##Renaming columns names 
+dat_csv <- as_tibble(dat_csv)
+dat_csv <- rename_with(dat_csv, ~ tolower(gsub("Explained by:", "explained", .x, fixed = TRUE)))
+dat_csv <- rename_with(dat_csv, ~ tolower(gsub("+", "", .x, fixed = TRUE)))
+df <- rename_with(dat_csv, ~ tolower(gsub(" ", ".", .x, fixed = TRUE)))
+df
+
+```
+
+
+```{r}
+# Check type
+class(df)
+
+is.list(df)
+
+is.data.frame(df)
+
+is_tibble(df)
+
+is.matrix(df)
+
+dim(df)
+
+# Check whether there is some missing data
+library(naniar)
+
+#naniar::vis_miss(df)
+```
+
+## Importing data (Method 2)
+
+
+We can use this function in order to import the data. If we choose to use this method we must remember to assign the data to a variable after importing it. 
+```{r}
+DeborahImport<- function(fileimport="D:/R DataScieence Test"){ 
+      ############
+      # Function imports all CSV files at a particular location,
+      #  Groups by specific value and merges them,
+      #  Returns the merged dataset
+      ######
+  
+    # Required packages
+    if(!require(dplyr))install.packages("dplyr")
+    library(dplyr)
+    if(!require(dplyr))install.packages("dplyr")
+    library(dplyr)
+  
+    # Using the file location, import all csv files
+    tbl <-  list.files(path = fileimport  ,
+                       pattern = "*.csv", 
+                       full.names = T) %>% 
+            map_df(~read_csv(., col_types = cols(.default = "c"))) 
+
+   # Rename the data and clean csv names by removing " " and "."
+   data <-  rename_with(tbl, ~ tolower(gsub(" ", ".", .x, fixed = TRUE)))
+   
+   # Return data as output
+   return(data)
+}
+
+
+```
+
+Lets use the function in order to change the data.
+```{r}
+# Call the data importing function and assign the data to df
+#df <- DeborahImport()
+
+# Look at the type of data
+glimpse(df)
+```
+After importing the data we can begin to answer the question. Some manipulation was necessary in order to get the data ready to be plotted as error bars. This was specific to this question and a different set of manipulation could be expected of us in the test.
+
+```{r}
+
+# Change numeric variables to numeric and factor variables to factors
+df <- df %>%
+      mutate( healthy.life.expectancy = as.numeric(healthy.life.expectancy),
+              ladder.score = as.numeric(ladder.score),
+              standard.error.of.ladder.score = as.numeric(standard.error.of.ladder.score),
+              upperwhisker = as.numeric(upperwhisker),
+              lowerwhisker = as.numeric(lowerwhisker),
+              regional.indicator = as.factor(regional.indicator),
+              country.name = as.factor(country.name)
+      )
+
+
+# Aggregate using the median numeric value for each factor i.e. region
+# To find average change the one line median
+
+df1<- aggregate(df[, c("ladder.score",
+                       "standard.error.of.ladder.score",
+                       "healthy.life.expectancy",
+                       "upperwhisker",
+                       "lowerwhisker")], list(df$regional.indicator), median)
+
+```
+
+For more on [Reordering a variable in ggplot2](https://www.r-graph-gallery.com/267-reorder-a-variable-in-ggplot2.html).
+
+
+```{r warning =  FALSE, fig.align = 'center', fig.cap = "Happiness Ladder.\\label{Figure1}", fig.ext = 'png', fig.height = 5, fig.width = 7}
+
+# Rename Grouo.1 to  "regional.indicator"
+colnames(df1)[1] = "regional.indicator"
+
+# 
+df1$regional.indicator <- as.factor(df1$regional.indicator)
+
+df1 %>%
+  mutate(regional.indicator = fct_reorder(regional.indicator, healthy.life.expectancy)) %>%
+ggplot() +
+  aes(
+    x = as.factor(regional.indicator),
+    y = ladder.score,
+    ymin =  upperwhisker,
+    ymax =  lowerwhisker,
+    color = regional.indicator
+  ) +
+  geom_errorbar() + scale_x_discrete() +
+  geom_point(size = 1.5) + 
+  ylim(3.5, 7.5) +
+  labs(x = "Region", y = "Ladder Score", title = "Question 1 (a) Error bars") +
+  geom_text(aes(label = round(healthy.life.expectancy) ), vjust = -0.9) +
+  theme(text = element_text(size=8),
+        axis.text.x = element_text(angle = 90, vjust=1, hjust=1)
+        )
+
+```
+
+For the bar plot additional manipulation must take place in order to add the country variable.
+
+```{r}
+# remove the warning messages from dplyr, 'summarise warnings'
+options(dplyr.summarise.inform=F)
+
+# Group data by the regional indicator (factor)
+# Chose specific variables and apply the same transformation to the multiple variables
+# use the mean within each numeric variable selected
+
+# gather : "Gathers columns into key-value pairs"
+
+dfp <- df %>%
+ group_by(regional.indicator) %>%
+summarise_at(vars(c("ladder.score", starts_with("explained"), "dystopia..residual")), ~mean(.)) %>%
+  gather(Score,Value,-"regional.indicator",-"ladder.score") %>%
+  mutate(Score = gsub("explained.","",Score))
+       
+```
+
+
+The gather statement gathers the values into key-value pairs. We then use the Score value for a key for each statement we can see this further by expanding the variable where we see;
+```{r}
+#> unique(dfp$Score)
+#[1] "explained.log.gdp.per.capita"           "explained.social.support"              
+#[3] "explained.healthy.life.expectancy"      "explained.freedom.to.make.life.choices"
+#[5] "explained.generosity"                   "explained.perceptions.of.corruption"   
+#[7] "dystopia..residual"  
+```
+for each pair. We then use the <code>mutate<\code> statement in order to remove the <code>explained.<\code> from the columns where it is present.
+
+Now that we have the data prepared for each region we have to make a suplementary dataset for South Africa and then bind it to the original dataset using left join in order to make the final dat used in the plot.  This data has to be aranged in such a way that South Africa is first.
+
+
+After taking the full <code>df<\code> dataset we filter to extract values with string<code>"South Africa"<\code> in the <code>country.name<\code> column. After that we select the particular columns needed, this is the same as the previous regional dataset. Lastly we change the value in <code>regional.indicator<\code> from <code>"Sub-Saharan Africa"<\code> to <code>"South Africa"<\code> this is in order to plot the data with <code>"South Africa"<\code> on the x-axes after the left join. Remember there is already a <code>"Sub-Saharan Africa"<\code> region present, we are just manipulating the data to meet our needs. Not that <code>"South Africa"<\code> is not a subsection of <code>"Sub-Saharan Africa"<\code>.
+
+```{r}
+# This is a different dataset from the original df, not the dfd
+SAdata <- df %>%
+          filter(country.name == "South Africa")%>%
+          select(c(regional.indicator,ladder.score, starts_with("explained"), dystopia..residual)) %>%
+  # Change the regional.indicator to south africa
+  mutate(regional.indicator = "South Africa")%>%
+  # rename the columns as we did in the previous dataset to meet our secual needs
+  gather(Score,Value,-"regional.indicator",-"ladder.score") %>%
+  mutate(Score = gsub("explained.","",Score))
+  
+```
+Now we have the two different datasets, we have to left join them in order to make our final bindable dataset.
+```{r}
+# Bind by rows 
+dfp <- bind_rows(dfp, SAdata)
+
+unique(dfp$regional.indicator)
+```
+Above we see that the South Africa is part of regional indicator now. This is to use it on the x-axes for the data.
+
+Next we create the barplot. At first we had to take into account the ordering. We use two levels in order to order thw values in the bar plot. We start by ordering the values by regional indicator placing <code>"South Africa"<\code> first followed by moving the other values to be reordered by the arithmetic mean ladder score. We then pull this as a vector showing that order and use it on the x-axes of our plot.
+
+Next, we must consider the <code>Score<\code> that we use as the <code>fill<\code> of our dataset, i.e. the colour that fills the levels of our barplot. We use the average of the <code>Value<\code>
+column to do this. This is just for aesthetics of course.
+
+```{r}
+colnames(df)
+```
+
+
+```{r}
+# Create first level of ordering with ZA first
+
+ order1 <-  df %>%  
+            group_by(regional.indicator)%>%
+            dplyr::summarise(Laddermean = mean(ladder.score))%>%
+            arrange(Laddermean)%>%
+            pull(regional.indicator)
+ order1 <- c("South Africa",levels(order1))
+
+
+# Second level of ordering for the Score
+order2 <- dfp%>% group_by(Score)%>%
+          dplyr::summarise(AvgValue = mean(Value))%>%
+          arrange(AvgValue)%>%
+          pull(Score)
+
+## Print these objects out to see what I mean 
+print(order1)
+#print(order2)
+
+```
+
+Rather use mutate to reorder with specific values rather than using his function. It is bad programming practice to write your own functions when there is an inbuilt function to do the same thing. This is a sin.
+
+
+```{r,  warning =  TRUE, fig.align = 'center', fig.cap = "Happiness Ladder.\\label{Figure2}", fig.ext = 'png', fig.height = 5, fig.width = 7}
+
+# Use order 1 and order 2 in order to set the barplot to print these things in the required order
+dfp %>%
+  # Reorder the variables using order 1 and order 2 (reorder with specific values)
+  mutate(regional.indicator = fct_relevel(regional.indicator, order1)) %>%
+  mutate(Score = fct_relevel(Score, order2)) %>%
+  # Barplot begins
+ggplot()+
+  aes(
+    x = regional.indicator,
+    weight = ladder.score,
+    fill = Score) +
+  geom_bar() +
+  scale_fill_hue(direction = 1) +
+  labs(x = "Region", y = "Ladder Score", title = "Title") +
+  theme_minimal() +
+  theme(text = element_text(size=8),
+        axis.text.x = element_text(angle = 90, vjust=1, hjust=1))
+
+
+```
+
+
+
+
+

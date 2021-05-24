@@ -1,0 +1,138 @@
+---
+title: "20331568 Data Science Practical Test"
+output:
+  pdf_document: default
+  md_document:
+    variant: markdown_github
+  html_document:
+    df_print: paged
+---
+
+## Purpose
+
+The purpose of the project is to create
+
+
+## Question 1 Solution
+
+## Code used for Figures and Tables
+
+```{r}
+gc() # garbage collection - It can be useful to call gc after a large object has been removed, as this may prompt R to return memory to the operating system.
+library(pacman)
+p_load(tidyverse, lubridate)
+
+# Source in all your functions:
+# walk is the 'silent' version of map, which is similar to lapply.
+list.files('D:/20331568/Solution/20331568/Question1/code', full.names = T, recursive = T) %>% as.list() %>% walk(~source(.))
+```
+
+### Data
+
+I put the unzipped data files in their respective question folders.
+
+For loading in the README - adjust the code.
+
+### Question 1
+
+#### Loading the data
+
+```{r}
+#ctrl alt i - load r chunk 
+
+#datcolat <- Data_Collating(Datroot = "Question1/Data/Happy/")
+
+
+```
+
+
+#### First plot
+
+I can describe this plot as follows...
+
+It shows that ....
+
+```{r}
+# adjust the sizes to fit into the readme a bit.
+
+#g <- Error_bar_plot(datcolat, xaxis_size = 9, xaxis_rows = 3)
+#g
+```
+
+The second plot in the paper ...
+
+```{r}
+ # g <-  Barplot_breakdown_Happy_Contributors(datcolat, Title = "Barplot making up the ladder", Subtitle = "Look at the colours - wow.", xaxis_size = 9, xaxis_rows = 3)
+    
+#g
+```
+
+## Question 2
+
+## Data Directory 
+
+```{r}
+if(!require("tidyverse")) install.packages("tidyverse")
+library(tidyverse)
+
+list.files('D:/20331568/Solution/20331568/Question2/code', full.names = T, recursive = T) %>% as.list() %>% walk(~source(.))
+
+```
+
+## Data loading:
+```{r}
+Loc <- "Question2/data/Wine/"
+    dff <- read_rds(glue::glue("{Loc}WineMag.rds"))
+    Fruitlist <- read_table("Question2/data/wine/Fruitlist.txt")
+    froots <- Fruitlist$Fruits  %>% unique %>% as.list()
+    CountryList <- c("South Africa", "Italy", "France", "US", "Spain")
+
+    dff_adj <- dff %>% filter(country %in% CountryList)
+```
+
+
+
+### First plot
+
+I can describe this plot as follows...
+
+It shows that ....
+
+```{r}
+
+```
+
+### Table of Frequency 
+
+This is a table function with Latex argument so that it can build in html form for use in README.
+
+```{r, message=FALSE}
+Tab <- Term_refs_table(dff_adj, Latex = FALSE)
+Tab
+```
+
+
+### Second plot
+
+I can describe this plot as follows...
+
+It shows that ....
+
+```{r, message=FALSE}
+Tasters <- c( "Lauren Buzzeo" , "Susan Kostrzewa")
+df_SA <-
+    dff %>% filter(country %in% "South Africa", price > 50, taster_name %in% Tasters)
+
+gg <- Top_5_Wineries_SA_Plot(df_SA, Tasters)
+gg
+```
+
+### Regression plot
+
+Short overview
+
+```{r, message=FALSE}
+Regression_Plot(df_SA)
+
+```
+
